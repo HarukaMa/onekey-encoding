@@ -98,27 +98,33 @@ function man {
     echo 
     echo "  o As opus is not currently in ISO MP4 standard, jobs use opus encoding  will"
     echo "    produce mkv files. Other encoding options will produce  mp4  files.  Those"
-    echo "    file types are not decided by output  file  extensions.  This  may  change"
+    echo "    file types are NOT decided by output  file  extensions.  This  may  change"
     echo "    later as opus makes its way into the standard."
     echo "  o Tingju preset and haruka preset may change as the script updates.  To  see"
-    echo "    the exact encoder settings, either see the script source or use  mediainfo"
+    echo "    the exact encoder settings, either read the script source or use mediainfo"
     echo "    on produced files."
     echo "  o You have to make sure that your ffmpeg has the needed libraries  compiled."
+    echo "  o Use reasonable audio bitrate, as the script is not checking if your  input"
+    echo "    is correct."
+    echo "  o Make sure you have written the path correctly. Add quotes if needed."
     echo "  o While ffmpeg is clever enough to detect  some  font  name  fallbacks,  you"
     echo "    should make sure that it has used the correct font, especially on your 1st"
     echo "    use of the script or change of the font used."
+    echo "  o The subtitle filter in ffmpeg currently REQUIRES a simple path to the  ass"
+    echo "    file. It seems that it won't read the file if its path needs any escaping."
     echo "  o As ffmpeg uses libass to render the subtitles, some  non-standard  effects"
     echo "    won't work. It looks like that all VSFilter effects are supported."
-    echo "  o Make sure you have written the path correctly. Add quotes if needed."
-    echo "  o Use reasonable audio bitrate, as the script is not checking if your  input"
-    echo "    is correct."
+    echo "  o It is NOT recommended to use VSFilter to provide subtitle rendering.  Some"
+    echo "    fonts even won't work under wine (while I suspect  it's  related  to  some"
+    echo "    specific environment). YMMV."
     echo 
 }
 
 function usage {
-    echo "Usage: $0 -i avsfile [OPTION]... output"
+    echo "Usage: $0 [OPTION]... output"
+    echo "See full help (-h) for options and their description."
     echo 
-    echo "READ DOCUMENTATION BEFORE FIRST USE ($0 -h)!"
+    echo "Make sure you read the full help before actual use!"
 }
 
 bitrate="128k"
@@ -127,7 +133,8 @@ fformat="mp4"
 aformat="libfdk_aac"
 
 echo "One-key encoding script version 0.1"
-echo "Created by Haruka @ Makari"
+echo "Written by Haruka @ Makari"
+echo "Original idea by Zht @ MakariTsukiyo"
 echo 
 
 if [ $# = 0 ]; then

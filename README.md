@@ -1,8 +1,8 @@
 One-key encoding
 ===============
 
-A shell script for fansub groups to rapidly release works.
-Brought to you by Haruka @ Makari.
+A shell script for fansub groups to rapidly release works.<br>
+Brought to you by Haruka @ Makari.<br>
 Original idea by Zht @ MakariTsukiyo.
 
 # Prerequisites

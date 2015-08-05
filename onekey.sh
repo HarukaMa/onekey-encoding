@@ -79,6 +79,9 @@ function man {
     echo "    Specify subtitle file to encode to the video (hardsubbing). It has to be a"
     echo "    ass file, and you have to make sure you  have  installed  required  fonts."
     echo "    ffmpeg will automatically rebuild the font cache if detected new fonts."
+    echo     
+    echo "  --scale"
+    echo "    Scale output video to 1280x720 using ffmpeg's builtin lanczos scaler."
     echo 
     echo "EXAMPLES"
     echo 
@@ -92,15 +95,11 @@ function man {
     echo 
     echo "  $0 -i source.mkv -x x265 -s ~/Documents/sc.ass sc.mkv"
     echo "    Produces x265/opus file with default encoding settings (128k opus  +  x265"
-    echo "    haruka preset), and hardsubbing specified subtitle."
+    echo "    Mizuhime preset), and hardsubbing specified subtitle."
     echo 
     echo "ADDITIONAL NOTICE"
     echo 
-    echo "  o As opus is not currently in ISO MP4 standard, jobs use opus encoding  will"
-    echo "    produce mkv files. Other encoding options will produce  mp4  files.  Those"
-    echo "    file types are NOT decided by output  file  extensions.  This  may  change"
-    echo "    later as opus makes its way into the standard."
-    echo "  o Tingju preset and haruka preset may change as the script updates.  To  see"
+    echo "  o Tingju preset and Mizuhime preset may change as the script updates. To see"
     echo "    the exact encoder settings, either read the script source or use mediainfo"
     echo "    on produced files."
     echo "  o You have to make sure that your ffmpeg has the needed libraries  compiled."
@@ -116,7 +115,7 @@ function man {
     echo "    won't work. It looks like that all VSFilter effects are supported."
     echo "  o It is NOT recommended to use VSFilter to provide subtitle rendering.  Some"
     echo "    fonts even won't work under wine (while I suspect  it's  related  to  some"
-    echo "    specific environment). YMMV."
+    echo "    specific environment). You can safely use avs to process the source."
     echo 
 }
 
@@ -197,9 +196,15 @@ else
                 shift ;;
             -b | --bitrate)
                 bitrate="$2"
+                bitnondef=1
                 shift;;
             -s | --subtitle )
                 subtitle="$2"
+                shift;;
+            --scale )
+                scale="true";;
+            --fformat )
+                fformat="$2"
                 shift;;
             * )
                 output="$1"
@@ -218,6 +223,9 @@ audiomap=
 if [ -n "$bitrate" ]; then
     bitcmdline="-b:a $bitrate"
 fi
+if [[ $aformat == "libfdk_aac" && "bitnondef" != 1 ]]; then
+        bitcmdline="-vbr 5 -cutoff 20000"
+    fi
 
 if [ -n "$audiofile" ]; then
     audiocmdline="-i \"$audiofile\" -c:a $aformat $bitcmdline"
@@ -227,13 +235,18 @@ if [ -n "$audiofile" ]; then
 fi
 
 if [ $vformat = "x265" ]; then
-    videocmdline="-c:v libx265 -preset veryslow -x265-params crf=26:psy-rd=0.6:psy-rdoq=0.6"
+    videocmdline="-map 0:0 -map 0:1 -c:v libx265 -preset medium -x265-params crf=24:psy-rd=0.6:psy-rdoq=0.6:me=2:subme=5:b-adapt=1:bframes=16:ref=4"
 else
     videocmdline="-c:v libx264 -crf 22 -x264-params deblockalpha=-1:deblockbeta=-1:keyint=720:min-keyint=24:b-pyramid=strict:aq-strength=0.8:qcomp=0.7:aq-mode=2:bframes=8:merange=32:me=umh:direct=auto:subme=10:trellis=2:psy-rd=0.9"
 fi
 
 if [ -n "$subtitle" ]; then
     subcmdline="-vf ass=\"$subtitle\""
+    if [ $scale = "true" ]; then
+        subcmdline="$subcmdline,scale=w=1280:h=720:flags=lanczos"
+    fi
+elif [ $scale = "true" ]; then
+    subcmdline="-vf scale=w=1280:h=720:flags=lanczos"
 fi
 
 if [ $fformat = "mkv" ]; then
@@ -257,5 +270,5 @@ fi
 # echo "aformat = $aformat"
 # echo "vformat = $vformat"
 # echo "fformat = $fformat"
-# echo 
+echo $cmdline
 eval $cmdline 
